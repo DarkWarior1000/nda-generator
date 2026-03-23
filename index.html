@@ -19,6 +19,9 @@
       --text:#eef2ff;
       --muted:#a8b3c7;
       --accent:#93c5fd;
+      --accent2:#22c55e;
+      --accent3:#f59e0b;
+      --danger:#ef4444;
       --line:#d6dde8;
       --paper:#ffffff;
       --paperText:#111827;
@@ -63,6 +66,20 @@
       line-height:1.6;
     }
 
+    .status-top{
+      margin-top:14px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px 16px;
+      border-radius:999px;
+      background:rgba(147,197,253,.12);
+      border:1px solid rgba(147,197,253,.24);
+      color:#dbeafe;
+      font-size:13px;
+      font-weight:700;
+    }
+
     .grid{
       display:grid;
       grid-template-columns:1.02fr .98fr;
@@ -76,10 +93,11 @@
       border-radius:var(--radius);
       box-shadow:var(--shadow);
       overflow:hidden;
-      backdrop-filter: blur(8px);
+      backdrop-filter:blur(8px);
     }
 
     .panel-head{
+      text-align:center;
       padding:18px 20px;
       border-bottom:1px solid rgba(255,255,255,.08);
     }
@@ -108,6 +126,7 @@
       font-size:18px;
       font-weight:800;
       color:#f8fbff;
+      text-align:center;
     }
 
     .subcard{
@@ -169,6 +188,7 @@
       flex-wrap:wrap;
       gap:10px;
       margin-top:10px;
+      justify-content:center;
     }
 
     button{
@@ -202,6 +222,7 @@
       border:1px solid rgba(255,255,255,.08);
       border-radius:14px;
       padding:12px;
+      text-align:center;
     }
 
     .meta-label{
@@ -247,15 +268,15 @@
       margin-bottom:18pt;
     }
 
+    .doc-section{
+      text-align:center;
+      font-weight:700;
+      margin:14pt 0 8pt;
+    }
+
     .doc-p{
       text-align:justify;
       margin:0 0 9pt 0;
-    }
-
-    .doc-section{
-      text-align:left;
-      font-weight:700;
-      margin:14pt 0 8pt;
     }
 
     .doc-signatures{
@@ -282,6 +303,7 @@
       color:var(--muted);
       font-size:12px;
       line-height:1.5;
+      text-align:center;
     }
 
     .sticky{
@@ -331,6 +353,7 @@
     <div class="hero">
       <h1>Generator NDA PRO</h1>
       <p>Wersja z układem kancelaryjnym: elegantszy formularz, podgląd jak kartka A4, poprawny PDF z polskimi znakami i DOCX generowany przez bibliotekę docx.</p>
+      <div class="status-top" id="statusTop">Autozapis włączony</div>
     </div>
 
     <div class="grid">
@@ -649,57 +672,6 @@
       };
     }
 
-    function generateText(){
-      const d = buildDocData();
-
-      return `UMOWA O ZACHOWANIU POUFNOŚCI (NDA) nr ${d.number}
-
-zawarta w dniu ${d.date} r. w ${d.place}, pomiędzy:
-
-1. Stroną 1:
-${d.p1}
-
-a
-
-2. Stroną 2:
-${d.p2}
-
-zwanymi dalej łącznie „Stronami”, a każda z osobna „Stroną”.
-
-§1. Przedmiot i cel umowy
-1. Strony zawierają niniejszą umowę w celu:
-${d.purpose}
-2. Obowiązek zachowania poufności dotyczy: ${d.contractType}.
-
-§2. Informacje poufne
-1. Za informacje poufne uznaje się w szczególności:
-${d.scope}
-2. Informacje poufne mogą być przekazywane w następującej formie:
-${d.formInfo}
-
-§3. Wyłączenia z obowiązku poufności
-Obowiązek zachowania poufności nie dotyczy następujących informacji:
-${d.exclusions}
-
-§4. Czas trwania umowy
-Niniejsza umowa zostaje zawarta na okres:
-${d.duration}
-
-§5. Zwrot lub zniszczenie informacji
-Po zakończeniu współpracy lub na żądanie uprawnionej Strony informacje i materiały objęte niniejszą umową podlegają następującym zasadom:
-${d.returnInfo}
-
-§6. Dane osobowe
-W zakresie danych osobowych Strony postanawiają, że:
-${d.rodo}
-
-§7. Sąd właściwy i postanowienia końcowe
-1. Spory wynikające z niniejszej umowy będą rozstrzygane przez:
-${d.court}
-2. Wszelkie zmiany niniejszej umowy wymagają formy dokumentowej, chyba że Strony postanowią inaczej.
-3. Umowę sporządzono w dwóch jednobrzmiących egzemplarzach, po jednym dla każdej ze Stron.`;
-    }
-
     function generatePreview(){
       const d = buildDocData();
 
@@ -753,11 +725,11 @@ ${d.court}
         <div class="doc-signatures">
           <div class="sig">
             <div class="sig-line"></div>
-            Strona 1
+            <strong>Strona 1</strong>
           </div>
           <div class="sig">
             <div class="sig-line"></div>
-            Strona 2
+            <strong>Strona 2</strong>
           </div>
         </div>
       `;
@@ -794,6 +766,22 @@ ${d.court}
       location.reload();
     }
 
+    function p(text){
+      return new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { after: 120 },
+        children: [new TextRun(text)]
+      });
+    }
+
+    function section(text){
+      return new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 140, after: 120 },
+        children: [new TextRun({ text, bold: true })]
+      });
+    }
+
     async function exportDOCX(){
       if(!validate()) return;
       const d = buildDocData();
@@ -805,70 +793,87 @@ ${d.court}
             new Paragraph({
               alignment: AlignmentType.CENTER,
               spacing: { after: 260 },
-              children: [new TextRun({ text: `UMOWA O ZACHOWANIU POUFNOŚCI (NDA) nr ${d.number}`, bold: true, size: 28 })]
+              children: [
+                new TextRun({
+                  text: `UMOWA O ZACHOWANIU POUFNOŚCI (NDA) nr ${d.number}`,
+                  bold: true,
+                  size: 28
+                })
+              ]
             }),
 
-            new Paragraph({ spacing: { after: 220 }, children: [new TextRun(`zawarta w dniu ${d.date} r. w ${d.place}, pomiędzy:`)] }),
+            p(`zawarta w dniu ${d.date} r. w ${d.place}, pomiędzy:`),
 
-            new Paragraph({ children: [new TextRun({ text: '1. Stroną 1:', bold: true })] }),
-            new Paragraph({ spacing: { after: 180 }, children: [new TextRun(d.p1)] }),
+            new Paragraph({
+              alignment: AlignmentType.JUSTIFIED,
+              spacing: { after: 120 },
+              children: [new TextRun({ text: '1. Stroną 1:', bold: true })]
+            }),
+            p(d.p1),
 
-            new Paragraph({ children: [new TextRun('a')] }),
-            new Paragraph({ children: [new TextRun({ text: '2. Stroną 2:', bold: true })] }),
-            new Paragraph({ spacing: { after: 180 }, children: [new TextRun(d.p2)] }),
+            p('a'),
 
-            new Paragraph({ spacing: { after: 220 }, children: [new TextRun('zwanymi dalej łącznie „Stronami”, a każda z osobna „Stroną”.')] }),
+            new Paragraph({
+              alignment: AlignmentType.JUSTIFIED,
+              spacing: { after: 120 },
+              children: [new TextRun({ text: '2. Stroną 2:', bold: true })]
+            }),
+            p(d.p2),
 
-            new Paragraph({ spacing: { before: 120, after: 120 }, children: [new TextRun({ text:'§1. Przedmiot i cel umowy', bold:true })] }),
-            new Paragraph('1. Strony zawierają niniejszą umowę w celu:'),
-            new Paragraph({ spacing: { after: 120 }, children: [new TextRun(d.purpose)] }),
-            new Paragraph({ spacing: { after: 180 }, children: [new TextRun(`2. Obowiązek zachowania poufności dotyczy: ${d.contractType}.`)] }),
+            p('zwanymi dalej łącznie „Stronami”, a każda z osobna „Stroną”.'),
 
-            new Paragraph({ spacing: { before: 120, after: 120 }, children: [new TextRun({ text:'§2. Informacje poufne', bold:true })] }),
-            new Paragraph('1. Za informacje poufne uznaje się w szczególności:'),
-            new Paragraph({ spacing: { after: 120 }, children: [new TextRun(d.scope)] }),
-            new Paragraph('2. Informacje poufne mogą być przekazywane w następującej formie:'),
-            new Paragraph({ spacing: { after: 180 }, children: [new TextRun(d.formInfo)] }),
+            section('§1. Przedmiot i cel umowy'),
+            p('1. Strony zawierają niniejszą umowę w celu:'),
+            p(d.purpose),
+            p(`2. Obowiązek zachowania poufności dotyczy: ${d.contractType}.`),
 
-            new Paragraph({ spacing: { before: 120, after: 120 }, children: [new TextRun({ text:'§3. Wyłączenia z obowiązku poufności', bold:true })] }),
-            new Paragraph('Obowiązek zachowania poufności nie dotyczy następujących informacji:'),
-            new Paragraph({ spacing: { after: 180 }, children: [new TextRun(d.exclusions)] }),
+            section('§2. Informacje poufne'),
+            p('1. Za informacje poufne uznaje się w szczególności:'),
+            p(d.scope),
+            p('2. Informacje poufne mogą być przekazywane w następującej formie:'),
+            p(d.formInfo),
 
-            new Paragraph({ spacing: { before: 120, after: 120 }, children: [new TextRun({ text:'§4. Czas trwania umowy', bold:true })] }),
-            new Paragraph('Niniejsza umowa zostaje zawarta na okres:'),
-            new Paragraph({ spacing: { after: 180 }, children: [new TextRun(d.duration)] }),
+            section('§3. Wyłączenia z obowiązku poufności'),
+            p('Obowiązek zachowania poufności nie dotyczy następujących informacji:'),
+            p(d.exclusions),
 
-            new Paragraph({ spacing: { before: 120, after: 120 }, children: [new TextRun({ text:'§5. Zwrot lub zniszczenie informacji', bold:true })] }),
-            new Paragraph('Po zakończeniu współpracy lub na żądanie uprawnionej Strony informacje i materiały objęte niniejszą umową podlegają następującym zasadom:'),
-            new Paragraph({ spacing: { after: 180 }, children: [new TextRun(d.returnInfo)] }),
+            section('§4. Czas trwania umowy'),
+            p('Niniejsza umowa zostaje zawarta na okres:'),
+            p(d.duration),
 
-            new Paragraph({ spacing: { before: 120, after: 120 }, children: [new TextRun({ text:'§6. Dane osobowe', bold:true })] }),
-            new Paragraph('W zakresie danych osobowych Strony postanawiają, że:'),
-            new Paragraph({ spacing: { after: 180 }, children: [new TextRun(d.rodo)] }),
+            section('§5. Zwrot lub zniszczenie informacji'),
+            p('Po zakończeniu współpracy lub na żądanie uprawnionej Strony informacje i materiały objęte niniejszą umową podlegają następującym zasadom:'),
+            p(d.returnInfo),
 
-            new Paragraph({ spacing: { before: 120, after: 120 }, children: [new TextRun({ text:'§7. Sąd właściwy i postanowienia końcowe', bold:true })] }),
-            new Paragraph('1. Spory wynikające z niniejszej umowy będą rozstrzygane przez:'),
-            new Paragraph({ spacing: { after: 120 }, children: [new TextRun(d.court)] }),
-            new Paragraph('2. Wszelkie zmiany niniejszej umowy wymagają formy dokumentowej, chyba że Strony postanowią inaczej.'),
-            new Paragraph({ spacing: { after: 300 }, children: [new TextRun('3. Umowę sporządzono w dwóch jednobrzmiących egzemplarzach, po jednym dla każdej ze Stron.')] }),
+            section('§6. Dane osobowe'),
+            p('W zakresie danych osobowych Strony postanawiają, że:'),
+            p(d.rodo),
+
+            section('§7. Sąd właściwy i postanowienia końcowe'),
+            p('1. Spory wynikające z niniejszej umowy będą rozstrzygane przez:'),
+            p(d.court),
+            p('2. Wszelkie zmiany niniejszej umowy wymagają formy dokumentowej, chyba że Strony postanowią inaczej.'),
+            p('3. Umowę sporządzono w dwóch jednobrzmiących egzemplarzach, po jednym dla każdej ze Stron.'),
 
             new Paragraph({
               alignment: AlignmentType.CENTER,
-              spacing: { before: 260 },
+              spacing: { before: 260, after: 80 },
               children: [new TextRun('.............................................')]
             }),
             new Paragraph({
               alignment: AlignmentType.CENTER,
               spacing: { after: 180 },
-              children: [new TextRun('Strona 1')]
+              children: [new TextRun({ text: 'Strona 1', bold: true })]
             }),
+
             new Paragraph({
               alignment: AlignmentType.CENTER,
+              spacing: { after: 80 },
               children: [new TextRun('.............................................')]
             }),
             new Paragraph({
               alignment: AlignmentType.CENTER,
-              children: [new TextRun('Strona 2')]
+              children: [new TextRun({ text: 'Strona 2', bold: true })]
             })
           ]
         }]
@@ -894,41 +899,41 @@ ${d.court}
           { text: `UMOWA O ZACHOWANIU POUFNOŚCI (NDA) nr ${d.number}`, alignment: 'center', bold: true, fontSize: 14, margin: [0,0,0,22] },
           { text: `zawarta w dniu ${d.date} r. w ${d.place}, pomiędzy:`, alignment: 'justify', margin: [0,0,0,14] },
 
-          { text: '1. Stroną 1:', bold: true },
+          { text: '1. Stroną 1:', bold: true, alignment: 'justify' },
           { text: d.p1, alignment: 'justify', margin: [0,0,0,12] },
-          { text: 'a', alignment: 'left', margin: [0,0,0,8] },
-          { text: '2. Stroną 2:', bold: true },
+          { text: 'a', alignment: 'justify', margin: [0,0,0,8] },
+          { text: '2. Stroną 2:', bold: true, alignment: 'justify' },
           { text: d.p2, alignment: 'justify', margin: [0,0,0,14] },
           { text: 'zwanymi dalej łącznie „Stronami”, a każda z osobna „Stroną”.', alignment: 'justify', margin: [0,0,0,16] },
 
-          { text: '§1. Przedmiot i cel umowy', bold: true, fontSize: 12, margin: [0,12,0,6] },
+          { text: '§1. Przedmiot i cel umowy', bold: true, fontSize: 12, alignment: 'center', margin: [0,12,0,6] },
           { text: '1. Strony zawierają niniejszą umowę w celu:', alignment: 'justify' },
           { text: d.purpose, alignment: 'justify', margin: [0,0,0,8] },
           { text: `2. Obowiązek zachowania poufności dotyczy: ${d.contractType}.`, alignment: 'justify', margin: [0,0,0,10] },
 
-          { text: '§2. Informacje poufne', bold: true, fontSize: 12, margin: [0,12,0,6] },
+          { text: '§2. Informacje poufne', bold: true, fontSize: 12, alignment: 'center', margin: [0,12,0,6] },
           { text: '1. Za informacje poufne uznaje się w szczególności:', alignment: 'justify' },
           { text: d.scope, alignment: 'justify', margin: [0,0,0,8] },
           { text: '2. Informacje poufne mogą być przekazywane w następującej formie:', alignment: 'justify' },
           { text: d.formInfo, alignment: 'justify', margin: [0,0,0,10] },
 
-          { text: '§3. Wyłączenia z obowiązku poufności', bold: true, fontSize: 12, margin: [0,12,0,6] },
+          { text: '§3. Wyłączenia z obowiązku poufności', bold: true, fontSize: 12, alignment: 'center', margin: [0,12,0,6] },
           { text: 'Obowiązek zachowania poufności nie dotyczy następujących informacji:', alignment: 'justify' },
           { text: d.exclusions, alignment: 'justify', margin: [0,0,0,10] },
 
-          { text: '§4. Czas trwania umowy', bold: true, fontSize: 12, margin: [0,12,0,6] },
+          { text: '§4. Czas trwania umowy', bold: true, fontSize: 12, alignment: 'center', margin: [0,12,0,6] },
           { text: 'Niniejsza umowa zostaje zawarta na okres:', alignment: 'justify' },
           { text: d.duration, alignment: 'justify', margin: [0,0,0,10] },
 
-          { text: '§5. Zwrot lub zniszczenie informacji', bold: true, fontSize: 12, margin: [0,12,0,6] },
+          { text: '§5. Zwrot lub zniszczenie informacji', bold: true, fontSize: 12, alignment: 'center', margin: [0,12,0,6] },
           { text: 'Po zakończeniu współpracy lub na żądanie uprawnionej Strony informacje i materiały objęte niniejszą umową podlegają następującym zasadom:', alignment: 'justify' },
           { text: d.returnInfo, alignment: 'justify', margin: [0,0,0,10] },
 
-          { text: '§6. Dane osobowe', bold: true, fontSize: 12, margin: [0,12,0,6] },
+          { text: '§6. Dane osobowe', bold: true, fontSize: 12, alignment: 'center', margin: [0,12,0,6] },
           { text: 'W zakresie danych osobowych Strony postanawiają, że:', alignment: 'justify' },
           { text: d.rodo, alignment: 'justify', margin: [0,0,0,10] },
 
-          { text: '§7. Sąd właściwy i postanowienia końcowe', bold: true, fontSize: 12, margin: [0,12,0,6] },
+          { text: '§7. Sąd właściwy i postanowienia końcowe', bold: true, fontSize: 12, alignment: 'center', margin: [0,12,0,6] },
           { text: '1. Spory wynikające z niniejszej umowy będą rozstrzygane przez:', alignment: 'justify' },
           { text: d.court, alignment: 'justify', margin: [0,0,0,8] },
           { text: '2. Wszelkie zmiany niniejszej umowy wymagają formy dokumentowej, chyba że Strony postanowią inaczej.', alignment: 'justify' },
@@ -936,8 +941,20 @@ ${d.court}
 
           {
             columns: [
-              { width: '*', stack: [{ text: '.............................................', alignment: 'center' }, { text: 'Strona 1', alignment: 'center', margin: [0,6,0,0] }] },
-              { width: '*', stack: [{ text: '.............................................', alignment: 'center' }, { text: 'Strona 2', alignment: 'center', margin: [0,6,0,0] }] }
+              {
+                width: '*',
+                stack: [
+                  { text: '.............................................', alignment: 'center' },
+                  { text: 'Strona 1', alignment: 'center', bold: true, margin: [0,6,0,0] }
+                ]
+              },
+              {
+                width: '*',
+                stack: [
+                  { text: '.............................................', alignment: 'center' },
+                  { text: 'Strona 2', alignment: 'center', bold: true, margin: [0,6,0,0] }
+                ]
+              }
             ],
             columnGap: 40
           }
@@ -947,35 +964,9 @@ ${d.court}
       pdfMake.createPdf(docDefinition).download(`${currentDocNumber().replace(/\//g,'_')}.pdf`);
     }
 
-    function collectData(){
-      const data = {};
-      document.querySelectorAll('input, textarea, select').forEach(el => {
-        data[el.id] = el.value;
-      });
-      return data;
-    }
-
-    function saveData(silent=false){
-      localStorage.setItem('ndaFormData', JSON.stringify(collectData()));
-      if(!silent){
-        setStatus('Zapisano ręcznie');
-        setTimeout(() => setStatus('Autozapis włączony'), 1200);
-      }
-    }
-
-    function loadData(){
-      const raw = localStorage.getItem('ndaFormData');
-      if(!raw) return;
-      const data = JSON.parse(raw);
-      Object.keys(data).forEach(key => {
-        if($(key)) $(key).value = data[key];
-      });
-    }
-
-    function clearData(){
-      localStorage.removeItem('ndaFormData');
-      localStorage.removeItem('ndaDocNumber');
-      location.reload();
+    function generateOnly(){
+      if(!validate()) return;
+      generatePreview();
     }
 
     document.querySelectorAll('input, textarea, select').forEach(el => {
@@ -998,11 +989,7 @@ ${d.court}
       });
     });
 
-    $('generateBtn').addEventListener('click', () => {
-      if(!validate()) return;
-      generatePreview();
-    });
-
+    $('generateBtn').addEventListener('click', generateOnly);
     $('docxBtn').addEventListener('click', exportDOCX);
     $('pdfBtn').addEventListener('click', exportPDF);
     $('saveBtn').addEventListener('click', () => saveData(false));
