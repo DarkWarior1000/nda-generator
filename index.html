@@ -10,149 +10,848 @@
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
   <style>
-    body { font-family: Inter, sans-serif; margin:0; background:#0f172a; color:#e2e8f0; }
-    .container { max-width:1400px; margin:auto; padding:20px; }
-    h1 { font-size:32px; margin-bottom:6px; }
-    .lead { color:#94a3b8; margin:0 0 18px; }
-    .grid { display:grid; grid-template-columns:1.08fr 0.92fr; gap:20px; }
-    .card { background:#1e293b; padding:20px; border-radius:16px; }
-    .section-title { margin:18px 0 10px; font-size:18px; }
-    .subcard { background:#0f172a; border:1px solid #334155; padding:16px; border-radius:14px; margin-top:10px; }
-    .row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-    .full { grid-column:1 / -1; }
-    input, textarea, select { width:100%; padding:12px; border-radius:10px; border:none; margin-top:6px; }
-    .help { font-size:12px; color:#94a3b8; margin-top:4px; }
-    button { padding:10px 14px; border:none; border-radius:10px; background:#38bdf8; color:#0f172a; font-weight:bold; cursor:pointer; }
-    .preview { white-space:pre-wrap; font-size:14px; }
+    :root{
+      --bg:#0f172a;
+      --bg-soft:#111c34;
+      --card:#1e293b;
+      --card-2:#0f172a;
+      --text:#e2e8f0;
+      --muted:#94a3b8;
+      --line:#334155;
+      --accent:#38bdf8;
+      --accent-2:#22c55e;
+      --accent-3:#f59e0b;
+      --danger:#ef4444;
+      --input-bg:#ffffff;
+      --input-text:#0f172a;
+      --shadow:0 12px 32px rgba(0,0,0,.22);
+      --radius:18px;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      font-family:Inter, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, #13213f 0%, var(--bg) 42%),
+        var(--bg);
+      color:var(--text);
+    }
+
+    .container{
+      max-width:1500px;
+      margin:0 auto;
+      padding:24px;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:flex-start;
+      margin-bottom:20px;
+      flex-wrap:wrap;
+    }
+
+    h1{
+      margin:0 0 8px;
+      font-size:34px;
+      line-height:1.1;
+      letter-spacing:-0.02em;
+    }
+
+    .lead{
+      margin:0;
+      color:var(--muted);
+      max-width:850px;
+      line-height:1.6;
+    }
+
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:rgba(56,189,248,.12);
+      color:#bae6fd;
+      border:1px solid rgba(56,189,248,.3);
+      border-radius:999px;
+      padding:10px 14px;
+      font-size:13px;
+      font-weight:600;
+      white-space:nowrap;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:22px;
+      align-items:start;
+    }
+
+    .card{
+      background:rgba(30,41,59,.96);
+      border:1px solid rgba(148,163,184,.12);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      backdrop-filter: blur(6px);
+    }
+
+    .card-head{
+      padding:18px 22px;
+      border-bottom:1px solid rgba(148,163,184,.12);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .card-title{
+      font-size:19px;
+      font-weight:800;
+      margin:0;
+    }
+
+    .card-sub{
+      margin:4px 0 0;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .card-body{
+      padding:22px;
+    }
+
+    .section{
+      margin-bottom:26px;
+    }
+
+    .section-title{
+      margin:0 0 14px;
+      font-size:18px;
+      font-weight:800;
+      color:#f8fafc;
+    }
+
+    .subcard{
+      background:linear-gradient(180deg, rgba(15,23,42,.95), rgba(12,18,32,.95));
+      border:1px solid var(--line);
+      padding:16px;
+      border-radius:16px;
+      margin-top:10px;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    .full{ grid-column:1 / -1; }
+
+    label{
+      display:block;
+      margin-top:10px;
+      font-size:13px;
+      font-weight:700;
+      color:#dbeafe;
+    }
+
+    input, textarea, select{
+      width:100%;
+      margin-top:6px;
+      padding:12px 13px;
+      border-radius:12px;
+      border:1px solid #475569;
+      background:var(--input-bg);
+      color:var(--input-text);
+      font:inherit;
+      transition:border-color .15s ease, box-shadow .15s ease, transform .05s ease;
+    }
+
+    input:focus, textarea:focus, select:focus{
+      outline:none;
+      border-color:#38bdf8;
+      box-shadow:0 0 0 4px rgba(56,189,248,.15);
+    }
+
+    textarea{
+      min-height:100px;
+      resize:vertical;
+    }
+
+    .hint{
+      margin-top:5px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .help{
+      margin-top:8px;
+      font-size:12px;
+      color:#cbd5e1;
+      line-height:1.55;
+      background:#0b1220;
+      border:1px dashed var(--line);
+      border-radius:12px;
+      padding:10px 12px;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+
+    button{
+      border:none;
+      border-radius:12px;
+      padding:11px 16px;
+      cursor:pointer;
+      font-weight:800;
+      font-size:14px;
+      transition:transform .06s ease, opacity .15s ease, box-shadow .15s ease;
+    }
+
+    button:hover{ opacity:.96; }
+    button:active{ transform:translateY(1px); }
+
+    .btn-primary{ background:var(--accent); color:#082f49; }
+    .btn-secondary{ background:#334155; color:#e2e8f0; }
+    .btn-success{ background:var(--accent-2); color:#052e16; }
+    .btn-warning{ background:var(--accent-3); color:#451a03; }
+    .btn-danger{ background:var(--danger); color:white; }
+
+    .inline-status{
+      align-self:center;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:600;
+    }
+
+    .meta-grid{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .meta-box{
+      background:#0b1220;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px 14px;
+    }
+
+    .meta-label{
+      display:block;
+      color:var(--muted);
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      margin-bottom:6px;
+    }
+
+    .meta-value{
+      font-size:14px;
+      font-weight:700;
+      color:#f8fafc;
+      word-break:break-word;
+    }
+
+    .preview{
+      white-space:pre-wrap;
+      word-break:break-word;
+      font-size:14px;
+      line-height:1.72;
+      color:#f8fafc;
+      background:linear-gradient(180deg, rgba(10,15,28,.8), rgba(15,23,42,.55));
+      border:1px solid rgba(148,163,184,.12);
+      padding:18px;
+      border-radius:16px;
+      min-height:700px;
+      font-family:"Times New Roman", Georgia, serif;
+    }
+
+    .sticky{
+      position:sticky;
+      top:18px;
+    }
+
+    .small-note{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+      margin-top:10px;
+    }
+
+    @media (max-width: 1120px){
+      .grid{ grid-template-columns:1fr; }
+      .sticky{ position:static; }
+    }
+
+    @media (max-width: 760px){
+      .container{ padding:14px; }
+      .row, .meta-grid{ grid-template-columns:1fr; }
+      h1{ font-size:28px; }
+      .card-body, .card-head{ padding:16px; }
+    }
+
+    @media print{
+      body{ background:#fff; color:#000; }
+      .topbar, .left-column{ display:none !important; }
+      .grid{ grid-template-columns:1fr; }
+      .card{ border:none; box-shadow:none; background:#fff; }
+      .card-head{ display:none; }
+      .card-body{ padding:0; }
+      .preview{
+        border:none;
+        background:#fff;
+        color:#000;
+        min-height:auto;
+        padding:0;
+      }
+    }
   </style>
 </head>
-
 <body>
-<div class="container">
-  <h1>Generator NDA PRO</h1>
-  <p class="lead">Generator umów NDA z zapisem danych i eksportem</p>
-
-  <div class="grid">
-
-    <div class="card">
-
-      <label>Rodzaj umowy</label>
-      <select id="type">
-        <option>jedna ze stron</option>
-        <option>obie strony</option>
-      </select>
-
-      <label>Miejsce</label>
-      <input id="place">
-
-      <label>Cel</label>
-      <textarea id="purpose"></textarea>
-
-      <h3>Strona 1</h3>
-      <select id="party1Kind" onchange="togglePartyFields()">
-        <option value="osoba fizyczna">osoba fizyczna</option>
-        <option value="osoba prawna">osoba prawna</option>
-      </select>
-
-      <div id="party1Person">
-        <input id="party1FirstName" placeholder="Imię">
-        <input id="party1LastName" placeholder="Nazwisko">
-        <input id="party1Address" placeholder="Adres">
-        <input id="party1Pesel" placeholder="PESEL">
+  <div class="container">
+    <div class="topbar">
+      <div>
+        <h1>Generator NDA PRO</h1>
+        <p class="lead">
+          Rozbudowany generator umowy o zachowaniu poufności z jasnymi opisami pól,
+          autozapisem, automatycznym wczytywaniem po odświeżeniu, numerowaniem dokumentów
+          oraz eksportem do DOCX i PDF.
+        </p>
       </div>
-
-      <div id="party1Company" style="display:none;">
-        <input id="party1CompanyName" placeholder="Firma">
-        <input id="party1CompanyAddress" placeholder="Adres">
-        <input id="party1Nip" placeholder="NIP">
-        <input id="party1Regon" placeholder="REGON">
-        <input id="party1Representative" placeholder="Reprezentant">
-      </div>
-
-      <h3>Strona 2</h3>
-      <select id="party2Kind" onchange="togglePartyFields()">
-        <option value="osoba fizyczna">osoba fizyczna</option>
-        <option value="osoba prawna">osoba prawna</option>
-      </select>
-
-      <div id="party2Person">
-        <input id="party2FirstName" placeholder="Imię">
-        <input id="party2LastName" placeholder="Nazwisko">
-        <input id="party2Address" placeholder="Adres">
-        <input id="party2Pesel" placeholder="PESEL">
-      </div>
-
-      <div id="party2Company" style="display:none;">
-        <input id="party2CompanyName" placeholder="Firma">
-        <input id="party2CompanyAddress" placeholder="Adres">
-        <input id="party2Nip" placeholder="NIP">
-        <input id="party2Regon" placeholder="REGON">
-        <input id="party2Representative" placeholder="Reprezentant">
-      </div>
-
-      <textarea id="scope" placeholder="Zakres"></textarea>
-      <textarea id="exclusions" placeholder="Wyłączenia"></textarea>
-      <input id="duration" placeholder="Czas trwania">
-
-      <button onclick="generate()">Generuj</button>
-      <button onclick="exportDOCX()">DOCX</button>
-      <button onclick="exportPDF()">PDF</button>
-
+      <div class="status-pill" id="saveStatusTop">Autozapis włączony</div>
     </div>
 
-    <div class="card">
-      <div id="preview" class="preview"></div>
-    </div>
+    <div class="grid">
+      <div class="left-column">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Formularz umowy</div>
+              <div class="card-sub">Uzupełnij pola. Podgląd dokumentu aktualizuje się automatycznie.</div>
+            </div>
+          </div>
 
+          <div class="card-body">
+            <div class="section">
+              <h2 class="section-title">Podstawowe informacje</h2>
+
+              <label for="type">Rodzaj umowy</label>
+              <select id="type">
+                <option>jedna ze stron</option>
+                <option>obie strony</option>
+              </select>
+              <div class="help">
+                Wskaż, kto ma obowiązek zachować w tajemnicy informacje otrzymane w związku ze współpracą.
+                Wybierz <b>jedna ze stron</b>, gdy tylko odbiorca informacji ma obowiązek poufności.
+                Wybierz <b>obie strony</b>, gdy każda strona będzie ujawniać drugiej informacje poufne.
+              </div>
+
+              <label for="place">Miejsce zawarcia umowy</label>
+              <input id="place" placeholder="np. Warszawa" />
+              <div class="help">
+                Wpisz miejscowość, w której strony zawierają umowę. Najczęściej jest to miasto podpisania dokumentu.
+              </div>
+
+              <label for="purpose">Cel zawarcia umowy</label>
+              <textarea id="purpose" placeholder="np. negocjacje handlowe dotyczące współpracy przy projekcie IT"></textarea>
+              <div class="help">
+                Opisz, po co strony zawierają NDA. Wpisz kontekst współpracy, np. negocjacje,
+                audyt, przygotowanie oferty, rozmowy inwestycyjne, dostęp do dokumentacji
+                lub realizację projektu.
+              </div>
+            </div>
+
+            <div class="section">
+              <h2 class="section-title">Strona 1</h2>
+              <div class="subcard">
+                <label for="party1Kind">Typ Strony 1</label>
+                <select id="party1Kind">
+                  <option value="osoba fizyczna">osoba fizyczna</option>
+                  <option value="osoba prawna">osoba prawna</option>
+                </select>
+                <div class="help">
+                  Wybierz formę strony. Dzięki temu pokażą się odpowiednie pola identyfikacyjne.
+                </div>
+
+                <div id="party1Person">
+                  <div class="row">
+                    <div>
+                      <label for="party1FirstName">Imię</label>
+                      <input id="party1FirstName" placeholder="np. Jan" />
+                      <div class="hint">Wpisz pierwsze imię osoby fizycznej.</div>
+                    </div>
+                    <div>
+                      <label for="party1LastName">Nazwisko</label>
+                      <input id="party1LastName" placeholder="np. Kowalski" />
+                      <div class="hint">Wpisz nazwisko osoby fizycznej.</div>
+                    </div>
+                    <div class="full">
+                      <label for="party1Address">Adres</label>
+                      <input id="party1Address" placeholder="np. ul. Leśna 10/5, 00-001 Warszawa" />
+                      <div class="hint">Wpisz pełny adres zamieszkania lub adres do doręczeń.</div>
+                    </div>
+                    <div>
+                      <label for="party1Pesel">PESEL</label>
+                      <input id="party1Pesel" placeholder="11 cyfr" />
+                      <div class="hint">Wpisz numer PESEL osoby fizycznej.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="party1Company" style="display:none;">
+                  <div class="row">
+                    <div class="full">
+                      <label for="party1CompanyName">Nazwa firmy</label>
+                      <input id="party1CompanyName" placeholder="np. ABC sp. z o.o." />
+                      <div class="hint">Wpisz pełną nazwę podmiotu zgodną z rejestrem.</div>
+                    </div>
+                    <div class="full">
+                      <label for="party1CompanyAddress">Adres</label>
+                      <input id="party1CompanyAddress" placeholder="np. ul. Długa 1, 00-950 Warszawa" />
+                      <div class="hint">Wpisz adres siedziby firmy.</div>
+                    </div>
+                    <div>
+                      <label for="party1Nip">NIP</label>
+                      <input id="party1Nip" placeholder="10 cyfr" />
+                      <div class="hint">Wpisz numer NIP.</div>
+                    </div>
+                    <div>
+                      <label for="party1Regon">REGON</label>
+                      <input id="party1Regon" placeholder="9 lub 14 cyfr" />
+                      <div class="hint">Wpisz numer REGON.</div>
+                    </div>
+                    <div class="full">
+                      <label for="party1Representative">Osoba reprezentująca</label>
+                      <input id="party1Representative" placeholder="np. Anna Nowak – Prezes Zarządu" />
+                      <div class="hint">
+                        Wpisz imię, nazwisko i funkcję osoby podpisującej umowę w imieniu firmy.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h2 class="section-title">Strona 2</h2>
+              <div class="subcard">
+                <label for="party2Kind">Typ Strony 2</label>
+                <select id="party2Kind">
+                  <option value="osoba fizyczna">osoba fizyczna</option>
+                  <option value="osoba prawna">osoba prawna</option>
+                </select>
+                <div class="help">
+                  Wybierz formę drugiej strony umowy.
+                </div>
+
+                <div id="party2Person">
+                  <div class="row">
+                    <div>
+                      <label for="party2FirstName">Imię</label>
+                      <input id="party2FirstName" placeholder="np. Maria" />
+                      <div class="hint">Wpisz pierwsze imię osoby fizycznej.</div>
+                    </div>
+                    <div>
+                      <label for="party2LastName">Nazwisko</label>
+                      <input id="party2LastName" placeholder="np. Zielińska" />
+                      <div class="hint">Wpisz nazwisko osoby fizycznej.</div>
+                    </div>
+                    <div class="full">
+                      <label for="party2Address">Adres</label>
+                      <input id="party2Address" placeholder="np. ul. Kwiatowa 7, 30-001 Kraków" />
+                      <div class="hint">Wpisz pełny adres zamieszkania lub adres do doręczeń.</div>
+                    </div>
+                    <div>
+                      <label for="party2Pesel">PESEL</label>
+                      <input id="party2Pesel" placeholder="11 cyfr" />
+                      <div class="hint">Wpisz numer PESEL osoby fizycznej.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="party2Company" style="display:none;">
+                  <div class="row">
+                    <div class="full">
+                      <label for="party2CompanyName">Nazwa firmy</label>
+                      <input id="party2CompanyName" placeholder="np. XYZ S.A." />
+                      <div class="hint">Wpisz pełną nazwę podmiotu zgodną z rejestrem.</div>
+                    </div>
+                    <div class="full">
+                      <label for="party2CompanyAddress">Adres</label>
+                      <input id="party2CompanyAddress" placeholder="np. ul. Słoneczna 20, 50-100 Wrocław" />
+                      <div class="hint">Wpisz adres siedziby firmy.</div>
+                    </div>
+                    <div>
+                      <label for="party2Nip">NIP</label>
+                      <input id="party2Nip" placeholder="10 cyfr" />
+                      <div class="hint">Wpisz numer NIP.</div>
+                    </div>
+                    <div>
+                      <label for="party2Regon">REGON</label>
+                      <input id="party2Regon" placeholder="9 lub 14 cyfr" />
+                      <div class="hint">Wpisz numer REGON.</div>
+                    </div>
+                    <div class="full">
+                      <label for="party2Representative">Osoba reprezentująca</label>
+                      <input id="party2Representative" placeholder="np. Piotr Malinowski – Członek Zarządu" />
+                      <div class="hint">
+                        Wpisz imię, nazwisko i funkcję osoby podpisującej umowę w imieniu firmy.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h2 class="section-title">Zakres umowy</h2>
+
+              <label for="scope">Zakres informacji poufnych</label>
+              <textarea id="scope" placeholder="np. cenniki, listy klientów, dokumentacja techniczna, kod źródłowy, warunki oferty"></textarea>
+              <div class="help">
+                Wpisz dokładnie, jakie informacje mają pozostać tajne. Najlepiej wymienić konkretne kategorie,
+                np. dane klientów, informacje finansowe, know-how, dokumentację, warunki współpracy,
+                plany biznesowe, materiały techniczne.
+              </div>
+
+              <label for="exclusions">Wyłączenia z poufności</label>
+              <textarea id="exclusions" placeholder="np. informacje publicznie dostępne, znane stronie wcześniej, ujawniane z mocy prawa"></textarea>
+              <div class="help">
+                Wpisz, które informacje nie będą objęte tajemnicą. Zwykle są to informacje publiczne,
+                wcześniej znane stronie, legalnie uzyskane od osoby trzeciej albo takie, które trzeba ujawnić
+                na podstawie przepisów prawa.
+              </div>
+
+              <label for="formInfo">Forma informacji</label>
+              <input id="formInfo" placeholder="np. pisemna, elektroniczna, ustna, w plikach, na nośnikach danych" />
+              <div class="help">
+                Wpisz, w jakiej formie przekazywane są informacje objęte umową. Możesz wskazać jedną lub kilka form,
+                np. dokumenty papierowe, e-maile, pliki, prezentacje, rozmowy ustne.
+              </div>
+
+              <label for="duration">Czas trwania umowy</label>
+              <input id="duration" placeholder="np. 12 miesięcy od dnia podpisania albo do 31.12.2026 r." />
+              <div class="help">
+                Wpisz, jak długo ma obowiązywać umowa. Możesz podać konkretny okres albo datę końcową.
+              </div>
+
+              <label for="returnInfo">Zwrot / zniszczenie informacji</label>
+              <textarea id="returnInfo" placeholder="np. po zakończeniu współpracy wszystkie materiały mają zostać zwrócone albo trwale usunięte w terminie 7 dni"></textarea>
+              <div class="help">
+                Opisz, co ma się stać z dokumentami i danymi po zakończeniu współpracy. Możesz wskazać zwrot dokumentów,
+                zniszczenie nośników, usunięcie plików lub termin wykonania tego obowiązku.
+              </div>
+
+              <label for="court">Sąd właściwy</label>
+              <input id="court" placeholder="np. sąd właściwy dla siedziby Strony ujawniającej albo sąd w Warszawie" />
+              <div class="help">
+                Wpisz, który sąd będzie rozstrzygał spory wynikające z umowy. Możesz wskazać konkretną miejscowość
+                albo zasadę właściwości, np. sąd właściwy dla siedziby jednej ze stron.
+              </div>
+
+              <label for="rodo">RODO</label>
+              <textarea id="rodo" placeholder="np. strony przetwarzają dane osobowe wyłącznie w celu realizacji umowy i zgodnie z RODO"></textarea>
+              <div class="help">
+                Wpisz zasady przetwarzania danych osobowych, jeśli w ramach współpracy strony przekazują sobie dane.
+                Możesz wskazać cel przetwarzania, podstawę prawną, obowiązek zabezpieczenia danych i ograniczenie ich wykorzystania.
+              </div>
+            </div>
+
+            <div class="section">
+              <h2 class="section-title">Akcje</h2>
+              <div class="actions">
+                <button type="button" class="btn-primary" id="saveBtn">Zapisz formularz</button>
+                <button type="button" class="btn-secondary" id="generateBtn">Generuj</button>
+                <button type="button" class="btn-success" id="docxBtn">Pobierz DOCX</button>
+                <button type="button" class="btn-warning" id="pdfBtn">Pobierz PDF</button>
+                <button type="button" class="btn-danger" id="clearBtn">Wyczyść zapis</button>
+              </div>
+              <div class="small-note">
+                Formularz zapisuje dane lokalnie w Twojej przeglądarce. Po odświeżeniu strony zapisane wartości zostaną automatycznie przywrócone.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sticky">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Podgląd dokumentu</div>
+              <div class="card-sub">Treść umowy aktualizuje się automatycznie.</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="meta-grid">
+              <div class="meta-box">
+                <span class="meta-label">Numer umowy</span>
+                <div class="meta-value" id="docNumberBox">—</div>
+              </div>
+              <div class="meta-box">
+                <span class="meta-label">Data</span>
+                <div class="meta-value" id="todayBox">—</div>
+              </div>
+              <div class="meta-box">
+                <span class="meta-label">Status</span>
+                <div class="meta-value" id="saveStatusBox">Autozapis włączony</div>
+              </div>
+            </div>
+
+            <div class="preview" id="preview"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
 
-<script>
-function val(id){ return document.getElementById(id).value || '[uzupełnij]'; }
+  <script>
+    function today() {
+      return new Date().toLocaleDateString('pl-PL');
+    }
 
-function togglePartyFields(){
-  document.getElementById('party1Person').style.display = val('party1Kind')==='osoba fizyczna'?'block':'none';
-  document.getElementById('party1Company').style.display = val('party1Kind')==='osoba prawna'?'block':'none';
-  document.getElementById('party2Person').style.display = val('party2Kind')==='osoba fizyczna'?'block':'none';
-  document.getElementById('party2Company').style.display = val('party2Kind')==='osoba prawna'?'block':'none';
-}
+    function getEl(id) {
+      return document.getElementById(id);
+    }
 
-function generate(){
-  document.getElementById('preview').textContent =
-`UMOWA NDA
+    function val(id) {
+      const el = getEl(id);
+      return el ? (el.value || '').trim() : '';
+    }
 
-${val('party1FirstName')} ${val('party1LastName')}
-z
-${val('party2FirstName')} ${val('party2LastName')}
+    function valOrPlaceholder(id) {
+      const v = val(id);
+      return v || '[uzupełnij]';
+    }
 
-Cel:
-${val('purpose')}`;
-}
+    function currentDocNumber() {
+      const existing = localStorage.getItem('ndaDocNumber');
+      if (existing) return existing;
+      const num = 'NDA/' + new Date().getFullYear() + '/' + String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+      localStorage.setItem('ndaDocNumber', num);
+      return num;
+    }
 
-function exportDOCX(){
-  const content = document.getElementById('preview').textContent
-    .replace(/\n/g, '<br>');
-  const html = `<html><body>${content}</body></html>`;
-  const blob = window.htmlDocx.asBlob(html);
-  saveAs(blob, 'nda.docx');
-}
+    function setStatus(text) {
+      const top = getEl('saveStatusTop');
+      const box = getEl('saveStatusBox');
+      if (top) top.textContent = text;
+      if (box) box.textContent = text;
+    }
 
-function exportPDF(){
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  doc.text(document.getElementById('preview').textContent, 10, 10);
-  doc.save('nda.pdf');
-}
+    function partyText(side) {
+      const kind = val(side + 'Kind');
+      if (kind === 'osoba prawna') {
+        return `${valOrPlaceholder(side + 'CompanyName')}, adres: ${valOrPlaceholder(side + 'CompanyAddress')}, NIP: ${valOrPlaceholder(side + 'Nip')}, REGON: ${valOrPlaceholder(side + 'Regon')}, reprezentowana przez: ${valOrPlaceholder(side + 'Representative')}`;
+      }
+      return `${valOrPlaceholder(side + 'FirstName')} ${valOrPlaceholder(side + 'LastName')}, adres: ${valOrPlaceholder(side + 'Address')}, PESEL: ${valOrPlaceholder(side + 'Pesel')}`;
+    }
 
-window.onload = function(){
-  const saved = JSON.parse(localStorage.getItem('ndaData')||'{}');
-  Object.keys(saved).forEach(k=>{
-    if(document.getElementById(k)) document.getElementById(k).value = saved[k];
-  });
+    function togglePartyFields() {
+      const p1 = val('party1Kind') || 'osoba fizyczna';
+      getEl('party1Person').style.display = p1 === 'osoba fizyczna' ? 'block' : 'none';
+      getEl('party1Company').style.display = p1 === 'osoba prawna' ? 'block' : 'none';
 
-  togglePartyFields();
-  generate();
-}
-</script>
+      const p2 = val('party2Kind') || 'osoba fizyczna';
+      getEl('party2Person').style.display = p2 === 'osoba fizyczna' ? 'block' : 'none';
+      getEl('party2Company').style.display = p2 === 'osoba prawna' ? 'block' : 'none';
+    }
+
+    function generate() {
+      const num = currentDocNumber();
+      const content =
+`UMOWA O ZACHOWANIU POUFNOŚCI (NDA) nr ${num}
+
+zawarta dnia ${today()} w ${valOrPlaceholder('place')}
+
+§1. Rodzaj umowy
+Strony zawierają niniejszą umowę jako umowę, w której obowiązek zachowania poufności dotyczy: ${valOrPlaceholder('type')}.
+
+§2. Strony umowy
+Strona 1: ${partyText('party1')}
+Strona 2: ${partyText('party2')}
+
+§3. Cel zawarcia umowy
+${valOrPlaceholder('purpose')}
+
+§4. Zakres informacji objętych poufnością
+Za informacje objęte obowiązkiem zachowania poufności Strony uznają w szczególności:
+${valOrPlaceholder('scope')}
+
+§5. Wyłączenia z obowiązku poufności
+Z obowiązku zachowania poufności wyłączone są następujące informacje:
+${valOrPlaceholder('exclusions')}
+
+§6. Forma informacji
+Informacje objęte niniejszą umową mogą być przekazywane w następującej formie:
+${valOrPlaceholder('formInfo')}
+
+§7. Czas trwania umowy
+Umowa zostaje zawarta na okres:
+${valOrPlaceholder('duration')}
+
+§8. Zwrot lub zniszczenie informacji
+Po zakończeniu współpracy lub na żądanie uprawnionej Strony, informacje i materiały objęte umową podlegają następującym zasadom:
+${valOrPlaceholder('returnInfo')}
+
+§9. Sąd właściwy
+Spory wynikające z niniejszej umowy będą rozstrzygane przez:
+${valOrPlaceholder('court')}
+
+§10. Dane osobowe (RODO)
+W zakresie danych osobowych Strony ustalają, że:
+${valOrPlaceholder('rodo')}
+
+§11. Postanowienia końcowe
+1. Wszelkie zmiany niniejszej umowy wymagają formy dokumentowej, chyba że Strony postanowią inaczej.
+2. Umowę sporządzono w dwóch jednobrzmiących egzemplarzach, po jednym dla każdej ze Stron, chyba że podpisano ją elektronicznie.
+
+.............................................                .............................................
+Strona 1                                                Strona 2`;
+
+      getEl('preview').textContent = content;
+      getEl('docNumberBox').textContent = num;
+      getEl('todayBox').textContent = today();
+    }
+
+    function collectData() {
+      const inputs = document.querySelectorAll('input, textarea, select');
+      const data = {};
+      inputs.forEach(i => {
+        data[i.id] = i.value;
+      });
+      return data;
+    }
+
+    function saveData(silent = false) {
+      const data = collectData();
+      localStorage.setItem('ndaData', JSON.stringify(data));
+      localStorage.setItem('ndaDataSavedAt', new Date().toISOString());
+
+      if (!silent) {
+        setStatus('Zapisano ręcznie');
+        setTimeout(() => setStatus('Autozapis włączony'), 1400);
+      }
+    }
+
+    function clearData() {
+      localStorage.removeItem('ndaData');
+      localStorage.removeItem('ndaDataSavedAt');
+      localStorage.removeItem('ndaDocNumber');
+      location.reload();
+    }
+
+    function exportDOCX() {
+      generate();
+      const content = getEl('preview').textContent
+        .replace(/\n/g, '<br>')
+        .replace(/  /g, '&nbsp;&nbsp;');
+
+      const html = `
+        <!DOCTYPE html>
+        <html>
+          <head><meta charset="utf-8"></head>
+          <body style="font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.6;">
+            ${content}
+          </body>
+        </html>
+      `;
+
+      const converted = window.htmlDocx.asBlob(html);
+      saveAs(converted, `${currentDocNumber().replace(/\//g, '_')}.docx`);
+    }
+
+    function exportPDF() {
+      generate();
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 48;
+      const lineHeight = 18;
+
+      doc.setFont('times', 'normal');
+      doc.setFontSize(11);
+
+      const lines = doc.splitTextToSize(getEl('preview').textContent, pageWidth - margin * 2);
+      let y = margin;
+
+      lines.forEach(line => {
+        if (y > pageHeight - margin) {
+          doc.addPage();
+          y = margin;
+        }
+        doc.text(line, margin, y);
+        y += lineHeight;
+      });
+
+      doc.save(`${currentDocNumber().replace(/\//g, '_')}.pdf`);
+    }
+
+    function bindAutoSave() {
+      const inputs = document.querySelectorAll('input, textarea, select');
+      inputs.forEach(el => {
+        el.addEventListener('input', () => {
+          if (el.id === 'party1Kind' || el.id === 'party2Kind') {
+            togglePartyFields();
+          }
+          saveData(true);
+          generate();
+          setStatus('Autozapisano');
+          clearTimeout(window.__ndaStatusTimer);
+          window.__ndaStatusTimer = setTimeout(() => setStatus('Autozapis włączony'), 1200);
+        });
+
+        el.addEventListener('change', () => {
+          if (el.id === 'party1Kind' || el.id === 'party2Kind') {
+            togglePartyFields();
+          }
+          saveData(true);
+          generate();
+          setStatus('Autozapisano');
+          clearTimeout(window.__ndaStatusTimer);
+          window.__ndaStatusTimer = setTimeout(() => setStatus('Autozapis włączony'), 1200);
+        });
+      });
+    }
+
+    function loadSavedData() {
+      const saved = JSON.parse(localStorage.getItem('ndaData') || '{}');
+      Object.keys(saved).forEach(k => {
+        if (getEl(k)) {
+          getEl(k).value = saved[k];
+        }
+      });
+    }
+
+    window.onload = function () {
+      loadSavedData();
+      togglePartyFields();
+      bindAutoSave();
+
+      getEl('saveBtn').addEventListener('click', () => saveData(false));
+      getEl('generateBtn').addEventListener('click', generate);
+      getEl('docxBtn').addEventListener('click', exportDOCX);
+      getEl('pdfBtn').addEventListener('click', exportPDF);
+      getEl('clearBtn').addEventListener('click', clearData);
+      getEl('party1Kind').addEventListener('change', togglePartyFields);
+      getEl('party2Kind').addEventListener('change', togglePartyFields);
+
+      generate();
+      setStatus('Autozapis włączony');
+    };
+  </script>
 </body>
 </html>
