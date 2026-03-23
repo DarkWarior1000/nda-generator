@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generator NDA</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f5f7fa;
+}
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 20px;
+}
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+}
+h1 { margin: 0 0 10px; }
+label { font-weight: bold; display:block; margin-top:10px; }
+input, textarea, select {
+  width: 100%;
+  padding: 8px;
+  margin-top:5px;
+}
+.preview {
+  white-space: pre-wrap;
+  font-family: serif;
+}
+button {
+  padding: 10px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+@media(max-width:900px){
+  .container{grid-template-columns:1fr;}
+}
+</style>
+</head>
+
+<body>
+
+<div style="padding:20px;">
+<h1>Generator NDA</h1>
+<button onclick="copyText()">Kopiuj</button>
+<button onclick="window.print()">PDF</button>
+</div>
+
+<div class="container">
+
+<div class="card">
+<form id="form">
+
+<label>Rodzaj umowy</label>
+<select id="type">
+<option>jednostronna</option>
+<option>dwustronna</option>
+</select>
+
+<label>Miejsce</label>
+<input id="place">
+
+<label>Strona 1</label>
+<textarea id="p1"></textarea>
+
+<label>Strona 2</label>
+<textarea id="p2"></textarea>
+
+<label>Cel</label>
+<textarea id="purpose"></textarea>
+
+<label>Zakres rozszerzony</label>
+<textarea id="scope"></textarea>
+
+<label>Wyłączenia</label>
+<textarea id="excl"></textarea>
+
+<label>Forma</label>
+<select id="formType">
+<option>pisemne</option>
+<option>ustne</option>
+<option>elektroniczne</option>
+<option>wszystkie</option>
+</select>
+
+<label>Udostępnianie</label>
+<select id="share">
+<option>pracownicy</option>
+<option>zakaz</option>
+<option>inne</option>
+</select>
+
+<label>Inne udostępnianie</label>
+<input id="shareOther">
+
+<label>Czas trwania</label>
+<input id="duration">
+
+<label>Poufność</label>
+<input id="conf">
+
+<label>Zwrot/zniszczenie</label>
+<select id="return">
+<option>zwrot</option>
+<option>zniszczenie</option>
+<option>na żądanie</option>
+</select>
+
+<label>Kara umowna (kwota)</label>
+<input id="penalty">
+
+<label>Sąd</label>
+<input id="court">
+
+<label>RODO</label>
+<textarea id="rodo"></textarea>
+
+</form>
+</div>
+
+<div class="card">
+<div id="preview" class="preview"></div>
+</div>
+
+</div>
+
+<script>
+function today(){
+ return new Date().toLocaleDateString('pl-PL');
+}
+
+function generate(){
+ const v=id=>document.getElementById(id).value;
+
+ let shareText = "";
+ if(v("share")=="pracownicy"){
+   shareText="dozwolone dla pracowników objętych poufnością";
+ }else if(v("share")=="zakaz"){
+   shareText="zakaz ujawniania";
+ }else{
+   shareText=v("shareOther");
+ }
+
+ let penaltyText = v("penalty") ?
+   "Kara: "+v("penalty")+" zł" :
+   "Brak kary";
+
+ let text = `
+UMOWA NDA
+
+Data: ${today()}
+Miejsce: ${v("place")||"[...]"}
+
+Strona 1:
+${v("p1")||"[...]"}
+
+Strona 2:
+${v("p2")||"[...]"}
+
+Rodzaj: ${v("type")}
+
+CEL:
+${v("purpose")||"[...]"}
+
+INFORMACJE POUFNE:
+Standard + ${v("scope")||"brak"}
+
+WYŁĄCZENIA:
+${v("excl")||"standard"}
+
+FORMA:
+${v("formType")}
+
+UDOSTĘPNIANIE:
+${shareText}
+
+CZAS:
+${v("duration")||"[...]"}
+
+POUFNOŚĆ:
+${v("conf")||"[...]"}
+
+ZWROT:
+${v("return")}
+
+${penaltyText}
+
+SĄD:
+${v("court")||"[...]"}
+
+RODO:
+${v("rodo")||"zgodnie z RODO"}
+
+PODPISY:
+__________
+__________
+`;
+
+ document.getElementById("preview").innerText=text;
+}
+
+function copyText(){
+ navigator.clipboard.writeText(document.getElementById("preview").innerText);
+ alert("Skopiowano!");
+}
+
+document.querySelectorAll("input, textarea, select").forEach(el=>{
+ el.addEventListener("input",generate);
+});
+
+generate();
+</script>
+
+</body>
+</html>
